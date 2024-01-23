@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from restaurant_app.core.db import get_async_session
 from restaurant_app.crud.restaurant import create_entity, read_all_entity, get_entity_by_id, update_entity, delete_entity
-from restaurant_app.schemas.restaurant import SubMenuCRU, DishCRU
+from restaurant_app.schemas.restaurant import SubMenuCRU, DishCRU, SubMenuResponse
 
 router = APIRouter()
 
@@ -62,7 +62,7 @@ async def remove_api_entity(
         type_of_entity: str,
         session: AsyncSession
 ):
-    ent = get_entity_by_id(entity_id, type_of_entity, session)
+    ent = await get_entity_by_id(entity_id, type_of_entity, session)
     try:
         ent = await delete_entity(
             ent, session
@@ -75,52 +75,52 @@ async def remove_api_entity(
     return ent
 
 
-@router.post('/menus/')
+@router.post('/menus/', status_code=HTTPStatus.CREATED, response_model=SubMenuResponse)
 async def create_new_main_menu(
     menu: SubMenuCRU,
     session: AsyncSession = Depends(get_async_session)
 ):
-    return create_api_new_entity(menu, 'menu', session)
+    return await create_api_new_entity(new=menu, type_of_entity='menu', id_sm=None, session=session)
 
 
-@router.post('/menus/{api_test_menu_id}/submenus')
+@router.post('/menus/{api_test_menu_id}/submenus', status_code=HTTPStatus.CREATED)
 async def create_new_main_menu(
     submenu: SubMenuCRU,
     api_test_menu_id: int,
     session: AsyncSession = Depends(get_async_session)
 ):
-    return create_api_new_entity(submenu, 'submenu', api_test_menu_id, session)
+    return await create_api_new_entity(submenu, 'submenu', api_test_menu_id, session)
 
 
-@router.post('/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}/dishes')
+@router.post('/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}/dishes', status_code=HTTPStatus.CREATED)
 async def create_new_main_menu(
     dish: DishCRU,
     api_test_menu_id: int,
     api_test_submenu_id: int,
     session: AsyncSession = Depends(get_async_session)
 ):
-    return create_api_new_entity(dish, 'dish', api_test_submenu_id, session)
+    return await create_api_new_entity(dish, 'dish', api_test_submenu_id, session)
 
 
 @router.get('/menus/')
 async def get_menus(
     session: AsyncSession = Depends(get_async_session)
 ):
-    return read_all_entity('menu', session)
+    return await read_all_entity('menu', session)
 
 
 @router.get('/menus/{api_test_menu_id}/submenus')
 async def get_submenus(
     session: AsyncSession = Depends(get_async_session)
 ):
-    return read_all_entity('submenu', session)
+    return await read_all_entity('submenu', session)
 
 
 @router.get('/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}/dishes')
 async def get_dishes(
     session: AsyncSession = Depends(get_async_session)
 ):
-    return read_all_entity('dish', session)
+    return await read_all_entity('dish', session)
 
 
 @router.get('/menus/{api_test_menu_id}')
@@ -128,7 +128,7 @@ async def get_menu(
     api_test_menu_id: int,
     session: AsyncSession = Depends(get_async_session)
 ):
-    return get_entity_by_id(api_test_menu_id, 'menu', session)
+    return await get_entity_by_id(api_test_menu_id, 'menu', session)
 
 
 @router.get('/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}')
@@ -136,7 +136,7 @@ async def get_submenu(
     api_test_submenu_id: int,
     session: AsyncSession = Depends(get_async_session)
 ):
-    return get_entity_by_id(api_test_submenu_id, 'submenu', session)
+    return await get_entity_by_id(api_test_submenu_id, 'submenu', session)
 
 
 @router.get('/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}/dishes/{api_test_dish_id}')
@@ -144,7 +144,7 @@ async def get_dish(
     api_test_dish_id: int,
     session: AsyncSession = Depends(get_async_session)
 ):
-    return get_entity_by_id(api_test_dish_id, 'dish', session)
+    return await get_entity_by_id(api_test_dish_id, 'dish', session)
 
 
 @router.delete('/menus/{api_test_menu_id}')
@@ -152,7 +152,7 @@ async def remove_menu(
         api_test_menu_id: int,
         session: AsyncSession = Depends(get_async_session),
 ):
-    menu = get_entity_by_id(api_test_menu_id, 'menu', session)
+    menu = await get_entity_by_id(api_test_menu_id, 'menu', session)
     try:
         menu = await delete_entity(
             menu, session
@@ -170,7 +170,7 @@ async def remove_submenu(
         api_test_submenu_id: int,
         session: AsyncSession = Depends(get_async_session),
 ):
-    submenu = get_entity_by_id(api_test_submenu_id, 'submenu', session)
+    submenu = await get_entity_by_id(api_test_submenu_id, 'submenu', session)
     try:
         submenu = await delete_entity(
             submenu, session
@@ -188,7 +188,7 @@ async def remove_dish(
         api_test_dish_id: int,
         session: AsyncSession = Depends(get_async_session),
 ):
-    dish = get_entity_by_id(api_test_dish_id, 'dish', session)
+    dish = await get_entity_by_id(api_test_dish_id, 'dish', session)
     try:
         dish = await delete_entity(
             dish, session

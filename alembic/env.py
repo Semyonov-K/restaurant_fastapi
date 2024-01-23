@@ -11,8 +11,14 @@ from alembic import context
 
 from restaurant_app.core.base import Base
 
+from pathlib import Path
+from dotenv import load_dotenv
 
-load_dotenv('.env')
+
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
+
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
